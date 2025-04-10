@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-u-tgv+n+w3wrtx%6om&%p!h^sl@!qu11mx=1%5^hy@_&dw%#po
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 # SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
@@ -34,9 +34,7 @@ CSRF_COOKIE_SECURE = True
 # SECURE_PROXY_SSL_HEADER = None
 # SECURE_HSTS_SECONDS = None
 
-MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'uploads')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads/')
 
 # Application definition
 
@@ -99,11 +97,25 @@ DATABASES = {
         'PASSWORD': 'admin',
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        # 'OPTIONS': {  
-        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
-        # }
+        'OPTIONS': {  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        }
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'rywoseke$hisab_kitab',
+#         'USER': 'rywoseke',
+#         'PASSWORD': 'admin@123',
+#         'HOST': 'rywoseke.mysql.pythonanywhere-services.com',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+#         }
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -141,7 +153,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-APPEND_SLASH=False
+# MEDIA_ROOT = os.path.join("./", 'media')
+MEDIA_URL = 'media/'
+# MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'uploads')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+APPEND_SLASH=True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

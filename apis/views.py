@@ -27,6 +27,55 @@ def Users(request):
         return JsonResponse({"message":"failed",'error':serializer.errors}, status = 400)
     return HttpResponse("success")
 
+@csrf_exempt
+def UserWithToken(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        jsonData = json.loads(json.dumps(data))
+        sign_in_token = jsonData['key']
+        try:
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    serializer = UserSerializer(user)
+                    return JsonResponse({'message':'success','body':serializer.data}, status=200)
+                else:
+                    return JsonResponse({'message':'User not found.','body':serializer.data}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status=404)
+    return HttpResponse("success")
+
+
+@csrf_exempt
+def UserLogin(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        jsonData = json.loads(json.dumps(data))
+        email = jsonData['email']
+        password = jsonData['pwd']
+        try:
+            if (User.objects.filter(email = email, pwd = password)).exists():
+                user = User.objects.get(email = email)
+                if (user.status == True):
+                    user.fcm_token = jsonData['fcm_token']
+                    user.device_token = jsonData['device_token']
+                    token = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits + string.ascii_letters) for _ in range(40))
+                    user.sign_in_token = token
+                    serializer = UserSerializer(user, data = data, partial = True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return JsonResponse({"message":"success","body":serializer.data},status=200)
+                    return JsonResponse({'message':'invalid credentials'},status=200)
+                else:
+                    return JsonResponse({'message':'your account will be de-activated. Please Registered another email account...'},status=200)
+            else:
+                return JsonResponse({"message":"check your email and password"},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status=404)
+    return HttpResponse("success")
+
 # Single User GET/PUT/PATCH/DELETE
 @csrf_exempt
 def UserItem(request, uid):
@@ -62,7 +111,6 @@ def Categories(request):
     if request.method == "GET":
         regis = Category.objects.all()
         serializer = CategorySerializer(regis, many = True)
-        
         return JsonResponse({'message':'success','body':serializer.data}, safe = False, status = 200)
     elif request.method == "POST":
         data = JSONParser().parse(request)
@@ -71,6 +119,27 @@ def Categories(request):
             serializer.save()
             return JsonResponse({'message':'success', 'user':serializer.data}, status=201)
         return JsonResponse({"message":"failed",'error':serializer.errors}, status = 400)
+    return HttpResponse("success")
+
+@csrf_exempt
+def CategoriesWithToken(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        jsonData = json.loads(json.dumps(data))
+        sign_in_token = jsonData['key']
+        try:
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    regis = Category.objects.all()
+                    serializer = CategorySerializer(regis, many = True)
+                    return JsonResponse({'message':'success','body':serializer.data}, status=200)
+                else:
+                    return JsonResponse({'message':'User not found.','body':serializer.data}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status=404)
     return HttpResponse("success")
 
 @csrf_exempt
@@ -170,33 +239,6 @@ def QtyTypes(request):
         return JsonResponse({"message":"failed",'error':serializer.errors}, status = 400)
     return HttpResponse("success")
 
-@csrf_exempt
-def UserLogin(request):
-    if request.method == 'POST':
-        data = JSONParser().parse(request)
-        jsonData = json.loads(json.dumps(data))
-        email = jsonData['email']
-        password = jsonData['pwd']
-        try:
-            if (User.objects.filter(email = email, pwd = password)).exists():
-                user = User.objects.get(email = email)
-                if (user.status == True):
-                    user.fcm_token = jsonData['fcm_token']
-                    user.device_token = jsonData['device_token']
-                    token = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits + string.ascii_letters) for _ in range(40))
-                    user.sign_in_token = token        
-                    serializer = UserSerializer(user, data = data, partial = True)
-                    if serializer.is_valid():
-                        serializer.save()
-                        return JsonResponse({"message":"success","body":serializer.data},status=200)
-                    return JsonResponse({'message':'invalid credentials'},status=200)
-                else:
-                    return JsonResponse({'message':'your account will be de-activated. Please Registered another email account...'},status=200)
-            else:
-                return JsonResponse({"message":"check your email and password"},status=200)
-        except User.DoesNotExist:
-            return JsonResponse({"message":"not found"}, status=404)
-    return HttpResponse("success")
 
 @csrf_exempt
 def OffersData(request):
@@ -220,9 +262,9 @@ class OfferUpload(APIView):
                 "last_date": request.data.get("last_date"),
                 "created_at": request.data.get("created_at"),
             },
-            context = {"request": request}, 
+            context = {"request": request},
         )
-        
+
         if qs_serializer.is_valid():
             qs_serializer.save()
             return Response(
@@ -239,4 +281,12 @@ class OfferUpload(APIView):
                     'body':None
                 },
                 status= status.HTTP_400_BAD_REQUEST
+            )
+
+    def get(self, request):
+        om = Offers.objects.all()
+        om_serializer = OffersSerializer(om, many=True)
+        return Response(
+                    qs_serializer.data,
+                status= status.HTTP_200_OK
             )

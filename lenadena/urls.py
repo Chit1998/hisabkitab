@@ -24,6 +24,8 @@ urlpatterns = [
     # path('admin', admin.site.urls),
     path('admin/', admin.site.urls),
     path('user', views.Users),
+    path('userInfo', views.UserWithToken),
+    path('categoryInfo', views.CategoriesWithToken),
     path('user/<int:uid>', views.UserItem),
     path('login', views.UserLogin),
     path('category', views.Categories),
@@ -34,5 +36,7 @@ urlpatterns = [
     path("",include("apis.urls")),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+# if settings.DEBUG:
+# else:
+    # urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
