@@ -15,8 +15,8 @@ USER_TYPE = (
 )
 
 PROVIDER = (
-    ("1","SELF")
-    ("2","GMAIL")
+    ("1","SELF"),
+    ("2","GMAIL"),
 )
 
 DEVICE_STATUS = (

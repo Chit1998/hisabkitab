@@ -287,6 +287,6 @@ class OfferUpload(APIView):
         om = Offers.objects.all()
         om_serializer = OffersSerializer(om, many=True)
         return Response(
-                    qs_serializer.data,
+                    om_serializer.data,
                 status= status.HTTP_200_OK
             )
