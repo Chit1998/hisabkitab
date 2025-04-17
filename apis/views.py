@@ -354,15 +354,45 @@ def CategoryMapInsert(request):
 @csrf_exempt
 def InsertSubCategory(request):
     if request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = SubCategorySerializer(data = {
-                'name': request.data.get('name'),
-                'brand_name': request.data.get('brand_name'),
-                'status': request.data.get('status'),
-                'category_id': request.data.get('category_id'),
-            })
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse({'message':'success', 'sub_category':serializer.data}, status=200)
-        return JsonResponse({"message":"failed",'error':serializer.errors}, status = 400)
+        try:
+            data = JSONParser().parse(request)
+            jsonData = json.loads(json.dumps(data))
+            sign_in_token = jsonData["key"]
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    if(SubCategory.objects.filter(name = jsonData["subcategory_name"], brand_name = jsonData['brand_name'])).exists():
+                        subcategory = SubCategory.objects.get(name = jsonData["subcategory_name"], brand_name = jsonData['brand_name'])
+                        subcategory_serializer = SubCategorySerializer(subcategory)
+                        category =  Category.objects.get(cid = subcategory_serializer.data['category_id'])
+                        category_serializer = CategorySerializer(category)
+                        return JsonResponse({"message": "subcategory already exists.","body": category_serializer.data }, status = 200)
+                    else:
+                        serializer = SubCategorySerializer(data = {
+                        'name': jsonData['subcategory_name'],
+                        'brand_name': jsonData['brand_name'],
+                        'status': jsonData['status'],
+                        'category_id': jsonData['category_id'],
+                        },context = {"request": request})
+                        if serializer.is_valid():
+                            serializer.save()
+                            serializerMap = SubCategoryMapSerializer(
+                                data = {
+                                    "sub_category_id": serializer.data['scid'],
+                                    "user_id": user.uid,
+                                    "description": jsonData['description']
+                                },context = {"request": request}
+                            )
+                            if serializerMap.is_valid():
+                                serializerMap.save()
+                                return JsonResponse({'message':'success', 'sub_category':serializer.data}, status=200)
+                            return JsonResponse({'message':'error', 'sub_category':serializer.data}, status=200)  
+                        return JsonResponse({'message':'error', 'sub_category':serializer.data}, status=400)  
+                else:
+                    return JsonResponse({'message':'User found. but this user is not active','body':[]}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"})
+        return JsonResponse({"message":"failed",'error':"not found"}, status = 400)
     return HttpResponse("success")
