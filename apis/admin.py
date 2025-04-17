@@ -5,7 +5,7 @@ from .models import *
 # Register your models here.
 
 class Users(admin.ModelAdmin):
-    list_display= ('uid', 'name', 'email','provider', 'phone_number','status','date_joined','created_at')
+    list_display= ('uid', 'name', 'email','provider', 'phone_number','user_type','status','date_joined','created_at')
 admin.site.register(User, Users)
 
 class OffersAdmin(admin.ModelAdmin):
@@ -17,7 +17,7 @@ class QtyTypeAdmin(admin.ModelAdmin):
 admin.site.register(QtyType, QtyTypeAdmin)
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display= ('cid', 'name', 'status','created_at','updated_to')
+    list_display= ('cid', 'name', 'status','created_at','updated_to','image')
 admin.site.register(Category, CategoryAdmin)
 
 class SubCategoryAdmin(admin.ModelAdmin):
@@ -39,3 +39,11 @@ admin.site.register(Borrow, BorrowAdmin)
 class ExpenseAdmin(admin.ModelAdmin):
     list_display= ('eid', 'title','price','status','sub_category_id','user_id','created_at','updated_to')
 admin.site.register(Expense, ExpenseAdmin)
+
+class CategoryMapAdmin(admin.ModelAdmin):
+    list_display= ('cmid', 'category_id','user_id','created_at','updated_to')
+admin.site.register(CategoryMap, CategoryMapAdmin)
+
+class SubCategoryMapAdmin(admin.ModelAdmin):
+    list_display= ('scmid', 'sub_category_id','user_id','description')
+admin.site.register(SubCategoryMap, SubCategoryMapAdmin)

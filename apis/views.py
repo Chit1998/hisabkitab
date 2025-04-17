@@ -99,7 +99,7 @@ def UserItem(request, uid):
         if serializer.is_valid():
             serializer.save()
             # return JsonResponse(serializer.data, status=201)
-            return JsonResponse({"message": "updated successfully", "uid": pk}, status=201)
+            return JsonResponse({"message": "updated successfully", "uid": uid}, status=201)
         return JsonResponse({'message':'failed','body':{},'error':serializer.errors},status=400)
     elif request.method == 'DELETE':
         registered.delete()
@@ -172,7 +172,7 @@ def CategoryItem(request, cid):
         serializer = CategorySerializer(registered,data = data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse({"message": "updated successfully", "cid": pk}, status=201)
+            return JsonResponse({"message": "updated successfully", "cid": cid}, status=201)
         return JsonResponse({'message':'failed','body':"",'error':serializer.errors},status=400)
     elif request.method == 'DELETE':
         registered.delete()
@@ -199,7 +199,6 @@ def SubCategoryItem(request, scid):
     try:
         registered = SubCategory.objects.get(pk=scid)
     except SubCategory.DoesNotExist:
-        # serializer = SubCategorySerializer(registered)
         return JsonResponse({"message":"not found",'body':""},status=404)
     if request.method == 'GET':
         serializer = SubCategorySerializer(registered)
@@ -216,8 +215,7 @@ def SubCategoryItem(request, scid):
         serializer = SubCategorySerializer(registered,data = data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            # return JsonResponse(serializer.data, status=201)
-            return JsonResponse({"message": "updated successfully", "id": pk}, status=201)
+            return JsonResponse({"message": "updated successfully", "id": scid}, status=201)
         return JsonResponse({'message':'failed','body':"",'error':serializer.errors},status=400)
     elif request.method == 'DELETE':
         registered.delete()
@@ -290,3 +288,81 @@ class OfferUpload(APIView):
                     om_serializer.data,
                 status= status.HTTP_200_OK
             )
+
+
+@csrf_exempt
+def CategoryMapWithToken(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        jsonData = json.loads(json.dumps(data))
+        sign_in_token = jsonData['key']
+        try:
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    regis = CategoryMap.objects.all()
+                    serializer = CategoryMapSerializer(regis, many = True)
+                    return JsonResponse({'message':'success','body':serializer.data}, status=200)
+                else:
+                    return JsonResponse({'message':'User not found.','body':serializer.data}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status=404)
+    return HttpResponse("success")
+
+
+@csrf_exempt
+def CategoryMapInsert(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        jsonData = json.loads(json.dumps(data))
+        sign_in_token = jsonData['key']
+        try:
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    category_id = jsonData['category_id']
+                    user_id = jsonData['user_id']
+                    cm_serializer = CategoryMapSerializer(
+                    data = {
+                            "category_id": category_id,
+                            "user_id": user_id,
+                        },
+                        context = {"request": request},
+                    )
+                    if cm_serializer.is_valid():
+                        cm_serializer.save()
+                        return JsonResponse({'message':'success','body':cm_serializer.data}, status=200)
+                    else:
+                        return Response(
+                            {
+                                'message':cm_serializer.errors,
+                                'body':None
+                            },
+                            status= status.HTTP_400_BAD_REQUEST
+                        )
+                else:
+                    return JsonResponse({'message':'User not found.','body':[]}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status=404)
+    return HttpResponse("success")
+
+
+@csrf_exempt
+def InsertSubCategory(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SubCategorySerializer(data = {
+                'name': request.data.get('name'),
+                'brand_name': request.data.get('brand_name'),
+                'status': request.data.get('status'),
+                'category_id': request.data.get('category_id'),
+            })
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({'message':'success', 'sub_category':serializer.data}, status=200)
+        return JsonResponse({"message":"failed",'error':serializer.errors}, status = 400)
+    return HttpResponse("success")

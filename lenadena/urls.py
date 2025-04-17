@@ -32,6 +32,8 @@ urlpatterns = [
     path('category/<int:cid>', views.CategoryItem),
     path('subcategory', views.SubCategories),
     path('qty_type', views.QtyTypes),
+    path('categoryMap', views.CategoryMapWithToken),
+    path('categoryMapInsert', views.CategoryMapInsert),
     path('subcategory/<int:scid>', views.SubCategoryItem),
     path("",include("apis.urls")),
 ]

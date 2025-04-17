@@ -6,9 +6,9 @@ from django.db import models
 from django.core.validators import MinLengthValidator
 
 
-# iterable 
+# iterable
 USER_TYPE = (
-    ("1", "Customer"), 
+    ("1", "Customer"),
     ("2", "Retailer"),
     ("3", "Vendor"),
     ("4", "Admin"),
@@ -63,7 +63,6 @@ class SubCategory(models.Model):
     scid = models.BigAutoField(auto_created=True, primary_key = True, serialize = False, verbose_name ='scid')
     name = models.CharField (max_length = 45)
     brand_name = models.CharField(max_length = 200, default = "", blank = True, null = True)
-    description = models.CharField(max_length = 200, default = "", blank = True, null = True)
     status = models.BooleanField (default = True)
     category_id = models.ForeignKey(Category, on_delete = models.CASCADE)
     created_at = models.DateTimeField(default= datetime.datetime.now)
@@ -71,6 +70,28 @@ class SubCategory(models.Model):
     class Meta:
         db_table = ('sub_category')
         verbose_name_plural = "Sub_Category"
+
+class CategoryMap(models.Model):
+    cmid = models.BigAutoField(auto_created=True, primary_key = True, serialize = False, verbose_name ='cmid')
+    user_id = models.ForeignKey(User, on_delete = models.CASCADE, blank = True, null = True, default = "")
+    category_id = models.ForeignKey(Category, on_delete = models.CASCADE, blank = True, null = True, default = "")
+    created_at = models.DateTimeField(default= datetime.datetime.now)
+    updated_to = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = ('CategoryMap')
+        verbose_name_plural = "CategoryMap"
+
+class SubCategoryMap(models.Model):
+    scmid = models.BigAutoField(auto_created=True, primary_key = True, serialize = False, verbose_name ='scmid')
+    user_id = models.ForeignKey(User, on_delete = models.CASCADE, blank = True, null = True, default = "")
+    sub_category_id = models.ForeignKey(SubCategory, on_delete = models.CASCADE, blank = True, null = True, default = "")
+    description = models.CharField(max_length = 200, default = "", blank = True, null = True)
+
+    class Meta:
+        db_table = ('SubCategoryMap')
+        verbose_name_plural = "SubCategoryMap"
+
 
 class QtyType(models.Model):
     qid = models.BigAutoField(auto_created=True, primary_key = True, serialize = False, verbose_name ='qid')

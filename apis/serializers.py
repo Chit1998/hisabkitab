@@ -7,25 +7,35 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
-        
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
-        
+
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = "__all__"
-        
+
 class QtyTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QtyType
         fields = "__all__"
-        
+
+class CategoryMapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryMap
+        fields = "__all__"
+
+class SubCategoryMapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategoryMap
+        fields = "__all__"
+
 class OffersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offers
         fields = "__all__"
         # fields = ('oid','name','image','status','category_id','user_id','last_date','created_at')
-        
+
