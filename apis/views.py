@@ -393,6 +393,49 @@ def InsertSubCategory(request):
             else:
                 return JsonResponse({"message":"check provide information", 'body': []},status=200)
         except User.DoesNotExist:
-            return JsonResponse({"message":"not found"})
-        return JsonResponse({"message":"failed",'error':"not found"}, status = 400)
+            return JsonResponse({"message":"not found"}, status = 400)
     return HttpResponse("success")
+
+@csrf_exempt
+def GetSubcategoryWithCategoryId(request):
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            jsonData = json.loads(json.dumps(data))
+            sign_in_token = jsonData["key"]
+            if (User.objects.filter(sign_in_token = sign_in_token)).exists():
+                user = User.objects.get(sign_in_token = sign_in_token)
+                if (user.status == True):
+                    if(SubCategory.objects.filter(category_id = jsonData["category_id"])).exists():
+                        data = SubCategory.objects.all()
+                        serializer = SubCategorySerializer(data, many = True)
+                        return JsonResponse({'message':'success','body':serializer.data}, status=200)
+                    else:
+                        return JsonResponse({'message':'not exists.','body':[]}, status=200)
+                    # if(SubCategory.objects.filter(category_id = jsonData["category_id"])).in_bulk():
+                    #     subCategory = SubCategory.objects.all()
+                    #     serializer = SubCategorySerializer(subCategory, many = True)
+                    #     print(serializer.data)
+                    #     return JsonResponse({'message':'success','body':serializer.data}, status=200)
+                    # else:
+                    #     return JsonResponse({'message':'not exists.','body':[]}, status=200)
+                else:
+                    return JsonResponse({'message':'User found. but this user is not active','body':[]}, status=200)
+            else:
+                return JsonResponse({"message":"check provide information", 'body': []},status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status = 400)
+    return HttpResponse("success")
+
+
+
+# class GroupedByCategoryAPIView(APIView):
+#     def get(self, request):
+#         products = Product.objects.filter(status=True)
+#         grouped_data = defaultdict(list)
+
+#         for product in products:
+#             serialized = ProductSerializer(product).data
+#             grouped_data[str(product.category_id)].append(serialized)
+
+#         return Response(grouped_data)
