@@ -21,9 +21,9 @@ from apis import views
 from django.conf import settings
 
 urlpatterns = [
-    # path('admin', admin.site.urls),
     path('admin/', admin.site.urls),
-    path('user', views.Users),
+    path('', views.Index.as_view()),
+    path('user', views.Users),  
     path('userInfo', views.UserWithToken),
     path('categoryInfo', views.CategoriesWithToken),
     path('user/<int:uid>', views.UserItem),

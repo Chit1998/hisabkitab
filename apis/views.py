@@ -11,6 +11,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # Create your views here.
 
+from django.views.generic.base import View
+from django.shortcuts import render
+
+class Index(View):
+  def get(self, request, *args, **kwargs):
+        print(request.GET)
+        return render(request, "./index.html")
+
 # ALL User GET/POST Single User
 @csrf_exempt
 def Users(request):
@@ -406,19 +414,9 @@ def GetSubcategoryWithCategoryId(request):
             if (User.objects.filter(sign_in_token = sign_in_token)).exists():
                 user = User.objects.get(sign_in_token = sign_in_token)
                 if (user.status == True):
-                    if(SubCategory.objects.filter(category_id = jsonData["category_id"])).exists():
-                        data = SubCategory.objects.all()
-                        serializer = SubCategorySerializer(data, many = True)
-                        return JsonResponse({'message':'success','body':serializer.data}, status=200)
-                    else:
-                        return JsonResponse({'message':'not exists.','body':[]}, status=200)
-                    # if(SubCategory.objects.filter(category_id = jsonData["category_id"])).in_bulk():
-                    #     subCategory = SubCategory.objects.all()
-                    #     serializer = SubCategorySerializer(subCategory, many = True)
-                    #     print(serializer.data)
-                    #     return JsonResponse({'message':'success','body':serializer.data}, status=200)
-                    # else:
-                    #     return JsonResponse({'message':'not exists.','body':[]}, status=200)
+                    subcategories = SubCategory.objects.filter(category_id = jsonData["category_id"])
+                    serialized = SubCategorySerializer(subcategories, many = True)
+                    return JsonResponse({'message':'success','body':serialized.data}, status=200)
                 else:
                     return JsonResponse({'message':'User found. but this user is not active','body':[]}, status=200)
             else:
@@ -428,14 +426,13 @@ def GetSubcategoryWithCategoryId(request):
     return HttpResponse("success")
 
 
-
-# class GroupedByCategoryAPIView(APIView):
-#     def get(self, request):
-#         products = Product.objects.filter(status=True)
-#         grouped_data = defaultdict(list)
-
-#         for product in products:
-#             serialized = ProductSerializer(product).data
-#             grouped_data[str(product.category_id)].append(serialized)
-
-#         return Response(grouped_data)
+@csrf_exempt
+def a(request):
+    if request.method == 'POST':
+        try:
+            data = JSONParser().parse(request)
+            jsonData = json.loads(json.dumps(data))
+            sign_in_token = jsonData["key"]
+        except User.DoesNotExist:
+            return JsonResponse({"message":"not found"}, status = 400)
+    return HttpResponse("success")
